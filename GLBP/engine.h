@@ -19,7 +19,7 @@ public:
 	bool done;
 
 	// Keyboard
-	bool	keys[256];			// Array Used For The Keyboard Routine
+	bool	keys[256];	// Array Used For The Keyboard Routine
 
 public:
 	~Engine();
