@@ -1,4 +1,5 @@
 #include "timer.h"
+#include <sstream>
 #include <windows.h>
 
 Timer::Timer()
@@ -13,15 +14,18 @@ Timer::Timer()
 
 Timer::~Timer()
 {
-
+	std::ostringstream ss;
+	ss << "Time: " << time_local << "\nfps:" << fps << "\n";
+	std::string s(ss.str());
+	OutputDebugString(s.c_str());
 }
 
 void Timer::update()
 {
 	time_old = time_new;
 	QueryPerformanceCounter((LARGE_INTEGER*)&time_new);
-	time_local = (long double)(time_new - time_start);
-	fps = 1000.0 / ((double)(long double)(time_new - time_old) / (long double)(time_rate) * 1000.0);
+	time_local = 1.0 * (double)(time_new - time_start)/(time_rate * 1.0);
+	fps = 1.0 / ((double)(time_new - time_old)  /(time_rate));
 }
 
 long long Timer::get_time()
@@ -29,7 +33,7 @@ long long Timer::get_time()
 	return time_new / (time_rate / 1000);
 }
 
-long long Timer::get_time_local()
+double Timer::get_time_local()
 {
 	return time_local;
 }

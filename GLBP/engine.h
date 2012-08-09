@@ -3,13 +3,16 @@
 
 #define ENGINE Engine::getInstance()
 
+#include "timer.h"
+
 class Engine
 {
 private:
 	Engine();
 	static Engine* engine;
+	static Timer* g_time;		// Global application time
 	static bool instanceflag;
-
+	
 public:
 	// Gameplay logic variables
 	float time_rate;	// The rate of passage of time
@@ -25,10 +28,12 @@ public:
 	~Engine();
 	static Engine* getInstance();
 	void initialize();
+	Timer* timer();
 
 	// Gameplay functions
 	
 	// Standard functions
-	void (*update)(float fps, long time);
+	void update();
 };
+
 #endif

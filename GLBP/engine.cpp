@@ -2,6 +2,7 @@
 
 bool Engine::instanceflag = false;
 Engine* Engine::engine = 0;
+Timer* Engine::g_time = 0;
 
 Engine::Engine()
 {
@@ -11,11 +12,18 @@ Engine::Engine()
 	}
 }
 
+Engine::~Engine()
+{
+	delete g_time;
+}
+
 void Engine::initialize()
 {
 	time_rate = 0.0f;
 	day_length = 60;
 	
+	g_time = new Timer();
+
 	done = false;
 }
 
@@ -29,4 +37,14 @@ Engine* Engine::getInstance()
 	engine = new Engine();
 
 	return engine;
+}
+
+void Engine::update()
+{
+	g_time->update();
+}
+
+Timer* Engine::timer()
+{
+	return g_time;
 }

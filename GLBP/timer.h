@@ -10,7 +10,7 @@ public:
 public:
 	void update();
 	long long get_time();
-	long long get_time_local();
+	double get_time_local();
 	double get_fps();
 	
 

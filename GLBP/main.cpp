@@ -294,7 +294,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 
 	
 	// Start main loop
-	while(!ENGINE->done)									// Loop That Runs While done=FALSE
+	while(!ENGINE->done)							// Loop That Runs While done=FALSE
 	{
 		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))	// Is There A Message Waiting?
 		{
@@ -313,15 +313,9 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 			// Draw The Scene.  Watch For ESC Key And Quit Messages From DrawGLScene()
 			if (active)								// Program Active?
 			{
-				if (ENGINE->keys[VK_ESCAPE])				// Was ESC Pressed?
+				if (ENGINE->keys[VK_ESCAPE])		// Was ESC Pressed?
 				{
-					ENGINE->done=TRUE;						// ESC Signalled A Quit
-				}
-				else								// Not Time To Quit, Update Screen
-				{
-					//update(0);
-					//RENDERER->render();						// Draw The Scene
-					//SwapBuffers(hDC);				// Swap Buffers (Double Buffering)
+					ENGINE->done=TRUE;				// ESC Signalled A Quit
 				}
 			}
 
@@ -338,9 +332,11 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 				}
 			}*/
 		}
+		ENGINE->update();
 	}
 	// Shutdown
 	RENDERER->~Renderer();
+	ENGINE->~Engine();
 	KillGLWindow();									// Kill The Window
 	return (msg.wParam);							// Exit The Program
 }
