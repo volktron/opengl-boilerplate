@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "engine.h"
 
 // OpenGL includes
 #include "glew.h"
@@ -91,9 +92,14 @@ void Renderer::render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear The Screen And The Depth Buffer
     glLoadIdentity();
 	glTranslatef(-1.5f,0.0f,-6.0f);   
+	glRotatef(ENGINE->timer()->get_time_local()*50.0, 1.0, 0.0, 0.0);
+	glRotatef(ENGINE->timer()->get_time_local()*20.0, 0.0, 1.0, 0.0);
 	glBegin(GL_TRIANGLES);                      // Drawing Using Triangles
+		glColor3f(1.0f,0.0f,0.0f);
 		glVertex3f( 0.0f, 1.0f, 0.0f);              // Top
+		glColor3f(0.0f,1.0f,0.0f);
 		glVertex3f(-1.0f,-1.0f, 0.0f);              // Bottom Left
+		glColor3f(0.0f,0.0f,1.0f);
 		glVertex3f( 1.0f,-1.0f, 0.0f);              // Bottom Right
 	glEnd();   
 }

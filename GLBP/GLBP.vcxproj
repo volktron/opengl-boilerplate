@@ -90,12 +90,16 @@
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="scene.cpp" />
     <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine.h" />
+    <ClInclude Include="entity.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="physics.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="scene.h" />
     <ClInclude Include="thread.h" />
     <ClInclude Include="timer.h" />
   </ItemGroup>
