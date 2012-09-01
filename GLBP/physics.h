@@ -24,6 +24,13 @@ namespace Physics
 			this->z = z;
 		}
 
+		void set(float x, float y, float z)
+		{
+			this->x = x;
+			this->y = y;
+			this->z = z;
+		}
+
 		Vector3* operator+=(Vector3* v)
 		{
 			this->x += v->x;

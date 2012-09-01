@@ -6,13 +6,17 @@
 class Entity
 {
 public:
-	Physics::Body body;
+	int id;
+	Physics::Body* body;
 	
 private:
 	~Entity();
 
 public:
 	Entity();
+	Entity(	float pos_x, float pos_y, float pos_z,
+			float rot_x, float rot_y, float rot_z,
+			float mass, float friction				);
 
 	void update(float delta_time);
 };

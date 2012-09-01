@@ -11,18 +11,16 @@ class Scene
 private:
 	vector<Entity*> entities;
 
-private:
-	~Scene();
-
 public:
 	Scene();
+	~Scene();
 
 	bool add();
 	bool remove();
 
 	void play();
 	void pause();
-	void update();
+	void update(float delta_time);
 	
 };
 

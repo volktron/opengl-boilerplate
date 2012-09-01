@@ -30,8 +30,11 @@ void Scene::pause()
 
 }
 
-void Scene::update()
+void Scene::update(float delta_time)
 {
-
+	for(int i = 0; i < this->entities.size(); i++)
+	{
+		this->entities[i]->update(delta_time);
+	}
 }
 

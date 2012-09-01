@@ -4,6 +4,8 @@
 #define ENGINE Engine::getInstance()
 
 #include "timer.h"
+#include "scene.h"
+#include <vector>
 
 class Engine
 {
@@ -12,7 +14,9 @@ private:
 	static Engine* engine;
 	static Timer* g_time;		// Global application time
 	static bool instanceflag;
-	
+
+	std::vector<Scene> scenes;
+
 public:
 	// Gameplay logic variables
 	float time_rate;	// The rate of passage of time
