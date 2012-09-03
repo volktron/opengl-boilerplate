@@ -5,6 +5,11 @@ Entity::Entity()
 	this->body = new Physics::Body();
 }
 
+Entity::~Entity()
+{
+	delete this->body;
+}
+
 Entity::Entity(	float pos_x, float pos_y, float pos_z,
 				float rot_x, float rot_y, float rot_z,
 				float mass, float friction				)

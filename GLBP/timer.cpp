@@ -10,6 +10,8 @@ Timer::Timer()
 	time_old = 0;
 
 	QueryPerformanceCounter((LARGE_INTEGER*)&time_start);
+
+	this->update();
 }
 
 Timer::~Timer()

@@ -37,4 +37,9 @@ void Scene::update(double delta_time)
 	{
 		this->entities[i]->update(delta_time);
 	}
+
+	for(unsigned int i = 0; i < this->cameras.size(); i++)
+	{
+		this->cameras[i]->update(delta_time);
+	}
 }

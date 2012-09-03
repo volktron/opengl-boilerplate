@@ -125,9 +125,9 @@ void Renderer::render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear The Screen And The Depth Buffer
     glLoadIdentity();
 	
-	int cam_x = ENGINE->scenes[0]->cameras[0]->body->position->x;
-	int cam_y = ENGINE->scenes[0]->cameras[0]->body->position->y;
-	int cam_z = ENGINE->scenes[0]->cameras[0]->body->position->z;
+	double cam_x = ENGINE->scenes[0]->cameras[0]->body->position->x;
+	double cam_y = ENGINE->scenes[0]->cameras[0]->body->position->y;
+	double cam_z = ENGINE->scenes[0]->cameras[0]->body->position->z;
 	glTranslatef(	-cam_x,
 					-cam_y, 
 					-cam_z	);
