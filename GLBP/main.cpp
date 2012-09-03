@@ -268,7 +268,11 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 	InitVSync();
 	SetVSyncState(false);
 
-	RENDERER->initialize(&hDC, &hRC);
+	RENDERER->initialize(	&hDC, 
+							&hRC, 
+							&hWnd,
+							&hInstance,
+							fullscreen	);
 	
 	// Start main loop
 	while(!ENGINE->done)							// Loop That Runs While done=FALSE
@@ -313,7 +317,6 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 	// Shutdown
 	RENDERER->~Renderer();
 	ENGINE->~Engine();
-	KillGLWindow();									// Kill The Window
 	return (msg.wParam);							// Exit The Program
 }
 

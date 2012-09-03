@@ -33,6 +33,11 @@ public:
 				RENDERER->pending_resize = false;
 				RENDERER->handle_resize();
 			}
+			if(RENDERER->pending_kill_gl)
+			{
+				RENDERER->pending_kill_gl = false;
+				RENDERER->kill_gl_window();
+			}
 
 			// Render!
 			render();
@@ -43,7 +48,10 @@ public:
 
 	DWORD Stop ( bool bForceKill = false )
 	{
-		wglMakeCurrent(NULL, NULL);
+		// Shutdown the gl context
+		RENDERER->pending_kill_gl = true;
+		while(RENDERER->pending_kill_gl);
+
 		return Thread::Stop(bForceKill);
 	}
 };
@@ -57,7 +65,11 @@ Renderer::Renderer()
 	((Render_Thread*)render_thread)->done = false;
 }
 
-void Renderer::initialize(HDC* hDC, HGLRC* hRC)
+void Renderer::initialize(	HDC*		hDC, 
+							HGLRC*		hRC, 
+							HWND*		hWnd, 
+							HINSTANCE*	hInstance,
+							bool		fullscreen)
 {
 	glShadeModel(GL_SMOOTH);							// Enable Smooth Shading
 	glClearColor(0.4f, 0.3f, 0.2f, 0.5f);				// Black Background
@@ -71,9 +83,12 @@ void Renderer::initialize(HDC* hDC, HGLRC* hRC)
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
 	wglMakeCurrent(0,0);
-	this->hDC = hDC;
-	this->hRC = hRC;
+	this->hDC	= hDC;
+	this->hRC	= hRC;
+	this->hWnd	= hWnd;
 
+	this->pending_fullscreen	= false;
+	this->pending_kill_gl		= false;
 	((Render_Thread*)render_thread)->hDC = hDC;
 	((Render_Thread*)render_thread)->hRC = hRC;
 	((Render_Thread*)render_thread)->Start();
@@ -84,7 +99,7 @@ Renderer::~Renderer()
 	((Render_Thread*)render_thread)->Stop();
 }
 
-Renderer* Renderer::getInstance()
+Renderer* Renderer::get_instance()
 {
 	if (instanceflag)
 		return renderer;
@@ -128,7 +143,7 @@ void Renderer::render()
 	double cam_x = ENGINE->scenes[0]->cameras[0]->body->position->x;
 	double cam_y = ENGINE->scenes[0]->cameras[0]->body->position->y;
 	double cam_z = ENGINE->scenes[0]->cameras[0]->body->position->z;
-	glTranslatef(	-cam_x,
+	glTranslated(	-cam_x,
 					-cam_y, 
 					-cam_z	);
 	
@@ -136,9 +151,9 @@ void Renderer::render()
 	for(int i = 0; i < num_entities; i++)
 	{
 		glPushMatrix();
-		glRotatef(ENGINE->scenes[0]->entities[i]->body->rotation->x, 1.0f, 0.0f, 0.0f);
-		glRotatef(ENGINE->scenes[0]->entities[i]->body->rotation->y, 0.0f, 1.0f, 0.0f);
-		glRotatef(ENGINE->scenes[0]->entities[i]->body->rotation->z, 0.0f, 0.0f, 1.0f);
+		glRotated(ENGINE->scenes[0]->entities[i]->body->rotation->x, 1.0, 0.0, 0.0);
+		glRotated(ENGINE->scenes[0]->entities[i]->body->rotation->y, 0.0, 1.0, 0.0);
+		glRotated(ENGINE->scenes[0]->entities[i]->body->rotation->z, 0.0, 0.0, 1.0);
 		glBegin(GL_TRIANGLES);                      // Drawing Using Triangles
 		glColor3f(1.0f,0.0f,0.0f);
 		glVertex3f( 0.0f, 1.0f, 0.0f);              // Top
@@ -154,3 +169,44 @@ void Renderer::render()
 	   
 }
 
+// Kill the window
+void Renderer::kill_gl_window()								// Properly Kill The Window
+{
+	if (this->fullscreen)										// Are We In Fullscreen Mode?
+	{
+		ChangeDisplaySettings(NULL,0);					// If So Switch Back To The Desktop
+		ShowCursor(TRUE);								// Show Mouse Pointer
+	}
+
+	if (*this->hRC)											// Do We Have A Rendering Context?
+	{
+		if (!wglMakeCurrent(NULL,NULL))					// Are We Able To Release The DC And RC Contexts?
+		{
+			MessageBox(NULL,"Release Of DC And RC Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		}
+
+		if (!wglDeleteContext(*this->hRC))						// Are We Able To Delete The RC?
+		{
+			MessageBox(NULL,"Release Rendering Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		}
+		*this->hRC=NULL;										// Set RC To NULL
+	}
+
+	if (*this->hDC && !ReleaseDC(*this->hWnd, *this->hDC))					// Are We Able To Release The DC
+	{
+		MessageBox(NULL,"Release Device Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		*this->hDC=NULL;										// Set DC To NULL
+	}
+
+	if (*this->hWnd && !DestroyWindow(*this->hWnd))					// Are We Able To Destroy The Window?
+	{
+		MessageBox(NULL,"Could Not Release hWnd.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		*this->hWnd=NULL;										// Set hWnd To NULL
+	}
+
+	if (!UnregisterClass("OpenGL",*this->hInstance))			// Are We Able To Unregister Class
+	{
+		MessageBox(NULL,"Could Not Unregister Class.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+		*this->hInstance=NULL;									// Set hInstance To NULL
+	}
+}
