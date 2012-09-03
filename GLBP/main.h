@@ -3,6 +3,7 @@
 
 // Includes
 #include <iostream>
+#include "wndproc.h"
 
 // Game logic
 #include "engine.h"
@@ -30,8 +31,6 @@ HINSTANCE	hInstance;		// Holds The Instance Of The Application
 
 bool	active=TRUE;		// Window Active Flag Set To TRUE By Default
 bool	fullscreen=FALSE;	// Fullscreen Flag Set To Fullscreen Mode By Default
-
-LRESULT	CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);	// Declaration For WndProc
 
 // Function pointer typdefs
 typedef void (APIENTRY *PFNWGLEXTSWAPCONTROLPROC) (int);

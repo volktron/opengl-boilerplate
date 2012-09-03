@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "engine.h"
+#include "wndproc.h"
 
 // OpenGL includes
 #include "glew.h"
@@ -69,8 +70,25 @@ void Renderer::initialize(	HDC*		hDC,
 							HGLRC*		hRC, 
 							HWND*		hWnd, 
 							HINSTANCE*	hInstance,
-							bool		fullscreen)
+							bool		fullscreen,
+							int			width,
+							int			height)
 {
+	this->hDC	= hDC;
+	this->hRC	= hRC;
+	this->hWnd	= hWnd;
+	this->hInstance = hInstance;
+
+	this->pending_fullscreen	= false;
+	this->pending_kill_gl		= false;
+	this->fullscreen			= fullscreen;
+
+	this->g_width = width;
+	this->g_height = height;
+	
+	this->create_gl_window();
+	glewInit();
+	
 	glShadeModel(GL_SMOOTH);							// Enable Smooth Shading
 	glClearColor(0.4f, 0.3f, 0.2f, 0.5f);				// Black Background
 	glClearDepth(1.0f);									// Depth Buffer Setup
@@ -83,12 +101,6 @@ void Renderer::initialize(	HDC*		hDC,
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
 	wglMakeCurrent(0,0);
-	this->hDC	= hDC;
-	this->hRC	= hRC;
-	this->hWnd	= hWnd;
-
-	this->pending_fullscreen	= false;
-	this->pending_kill_gl		= false;
 	((Render_Thread*)render_thread)->hDC = hDC;
 	((Render_Thread*)render_thread)->hRC = hRC;
 	((Render_Thread*)render_thread)->Start();
@@ -209,4 +221,165 @@ void Renderer::kill_gl_window()								// Properly Kill The Window
 		MessageBox(NULL,"Could Not Unregister Class.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
 		*this->hInstance=NULL;									// Set hInstance To NULL
 	}
+}
+
+BOOL Renderer::create_gl_window()
+{
+	GLuint		PixelFormat;					// Holds The Results After Searching For A Match
+	WNDCLASS	wc;								// Windows Class Structure
+	DWORD		dwExStyle;						// Window Extended Style
+	DWORD		dwStyle;						// Window Style
+	RECT		WindowRect;						// Grabs Rectangle Upper Left / Lower Right Values
+	WindowRect.left=(long)0;					// Set Left Value To 0
+	WindowRect.right=(long)this->g_width;		// Set Right Value To Requested Width
+	WindowRect.top=(long)0;						// Set Top Value To 0
+	WindowRect.bottom=(long)g_height;				// Set Bottom Value To Requested Height
+
+	
+	
+	*this->hInstance	= GetModuleHandle(NULL);				// Grab An Instance For Our Window
+	wc.style			= CS_HREDRAW | CS_VREDRAW | CS_OWNDC;	// Redraw On Size, And Own DC For Window.
+	wc.lpfnWndProc		= (WNDPROC) WndProc;					// WndProc Handles Messages
+	wc.cbClsExtra		= 0;									// No Extra Window Data
+	wc.cbWndExtra		= 0;									// No Extra Window Data
+	wc.hInstance		= *this->hInstance;							// Set The Instance
+	wc.hIcon			= LoadIcon(NULL, IDI_WINLOGO);			// Load The Default Icon
+	wc.hCursor			= LoadCursor(NULL, IDC_ARROW);			// Load The Arrow Pointer
+	wc.hbrBackground	= NULL;									// No Background Required For GL
+	wc.lpszMenuName		= NULL;									// We Don't Want A Menu
+	wc.lpszClassName	= "OpenGL";								// Set The Class Name
+
+	if (!RegisterClass(&wc))									// Attempt To Register The Window Class
+	{
+		MessageBox(NULL,"Failed To Register The Window Class.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;											// Return FALSE
+	}
+	
+	if (this->fullscreen)												// Attempt Fullscreen Mode?
+	{
+		DEVMODE dmScreenSettings;								// Device Mode
+		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));	// Makes Sure Memory's Cleared
+		dmScreenSettings.dmSize=sizeof(dmScreenSettings);		// Size Of The Devmode Structure
+		dmScreenSettings.dmPelsWidth	= this->g_width;				// Selected Screen Width
+		dmScreenSettings.dmPelsHeight	= this->g_height;				// Selected Screen Height
+		dmScreenSettings.dmBitsPerPel	= 32;					// Selected Bits Per Pixel
+		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+
+		// Try To Set Selected Mode And Get Results.  NOTE: CDS_FULLSCREEN Gets Rid Of Start Bar.
+		if (ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
+		{
+			// If The Mode Fails, Offer Two Options.  Quit Or Use Windowed Mode.
+			if (MessageBox(NULL,"The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?","NeHe GL",MB_YESNO|MB_ICONEXCLAMATION)==IDYES)
+			{
+				fullscreen=FALSE;		// Windowed Mode Selected.  Fullscreen = FALSE
+			}
+			else
+			{
+				// Pop Up A Message Box Letting User Know The Program Is Closing.
+				MessageBox(NULL,"Program Will Now Close.","ERROR",MB_OK|MB_ICONSTOP);
+				return FALSE;									// Return FALSE
+			}
+		}
+	}
+
+	if (this->fullscreen)												// Are We Still In Fullscreen Mode?
+	{
+		dwExStyle=WS_EX_APPWINDOW;								// Window Extended Style
+		dwStyle=WS_POPUP;										// Windows Style
+		ShowCursor(FALSE);										// Hide Mouse Pointer
+	}
+	else
+	{
+		dwExStyle=WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;			// Window Extended Style
+		dwStyle=WS_OVERLAPPEDWINDOW;							// Windows Style
+	}
+
+	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requested Size
+
+	// Create The Window
+	if (!(*this->hWnd=CreateWindowEx(	dwExStyle,							// Extended Style For The Window
+										"OpenGL",							// Class Name
+										"GL Boilerplate",					// Window Title
+										dwStyle |							// Defined Window Style
+										WS_CLIPSIBLINGS |					// Required Window Style
+										WS_CLIPCHILDREN,					// Required Window Style
+										0, 0,								// Window Position
+										WindowRect.right-WindowRect.left,	// Calculate Window Width
+										WindowRect.bottom-WindowRect.top,	// Calculate Window Height
+										NULL,								// No Parent Window
+										NULL,								// No Menu
+										*this->hInstance,					// Instance
+										NULL)))								// Dont Pass Anything To WM_CREATE
+	{
+		kill_gl_window();								// Reset The Display
+		MessageBox(NULL,"Window Creation Error.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;								// Return FALSE
+	}
+
+	static	PIXELFORMATDESCRIPTOR pfd=				// pfd Tells Windows How We Want Things To Be
+	{
+		sizeof(PIXELFORMATDESCRIPTOR),				// Size Of This Pixel Format Descriptor
+		1,											// Version Number
+		PFD_DRAW_TO_WINDOW |						// Format Must Support Window
+		PFD_SUPPORT_OPENGL |						// Format Must Support OpenGL
+		PFD_DOUBLEBUFFER,							// Must Support Double Buffering
+		PFD_TYPE_RGBA,								// Request An RGBA Format
+		32,											// Select Our Color Depth
+		0, 0, 0, 0, 0, 0,							// Color Bits Ignored
+		0,											// No Alpha Buffer
+		0,											// Shift Bit Ignored
+		0,											// No Accumulation Buffer
+		0, 0, 0, 0,									// Accumulation Bits Ignored
+		16,											// 16Bit Z-Buffer (Depth Buffer)  
+		0,											// No Stencil Buffer
+		0,											// Main Drawing Layer
+		0,											// No Auxiliary Buffer
+		PFD_MAIN_PLANE,								// Reserved
+		0, 0, 0										// Layer Masks Ignored
+	};
+	
+	if (!(*this->hDC = GetDC(*this->hWnd)))					// Did We Get A Device Context?
+	{
+		kill_gl_window();								// Reset The Display
+		MessageBox(NULL,"Can't Create A GL Device Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;								// Return FALSE
+	}
+
+	if (!(PixelFormat=ChoosePixelFormat(*this->hDC,&pfd)))	// Did Windows Find A Matching Pixel Format?
+	{
+		kill_gl_window();								// Reset The Display
+		MessageBox(NULL,"Can't Find A Suitable PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;								// Return FALSE
+	}
+
+	if(!SetPixelFormat(*this->hDC,PixelFormat,&pfd))		// Are We Able To Set The Pixel Format?
+	{
+		kill_gl_window();								// Reset The Display
+		MessageBox(NULL,"Can't Set The PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;								// Return FALSE
+	}
+
+	if (!(*this->hRC = wglCreateContext(*this->hDC)))				// Are We Able To Get A Rendering Context?
+	{
+		kill_gl_window();								// Reset The Display
+		MessageBox(NULL,"Can't Create A GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;								// Return FALSE
+	}
+
+	if(!wglMakeCurrent(*this->hDC,*this->hRC))					// Try To Activate The Rendering Context
+	{
+		kill_gl_window();								// Reset The Display
+		MessageBox(NULL,"Can't Activate The GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;								// Return FALSE
+	}
+
+	ShowWindow(*this->hWnd,SW_SHOW);						// Show The Window
+	SetForegroundWindow(*this->hWnd);						// Slightly Higher Priority
+	SetFocus(*this->hWnd);									// Sets Keyboard Focus To The Window
+	RENDERER->pending_width		= this->g_width;
+	RENDERER->pending_height	= this->g_height;
+	RENDERER->pending_resize	= true;
+	RENDERER->handle_resize();					// Set Up Our Perspective GL Screen
+
+	return TRUE;									// Success
 }

@@ -105,6 +105,7 @@
     <ClInclude Include="scene.h" />
     <ClInclude Include="thread.h" />
     <ClInclude Include="timer.h" />
+    <ClInclude Include="wndproc.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -257,22 +257,27 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 	//}
 	
 	// Create Our OpenGL Window
+	/*
 	if (!CreateGLWindow(title_string,width,height,32,fullscreen))
 	{
 		return 0;									// Quit If Window Was Not Created
-	}
-	
+	}*/
+	//CreateGLWindow(title_string,width,height,32,fullscreen);
 	ENGINE->initialize();
-	glewInit();
+	
 	// Game setup
-	InitVSync();
-	SetVSyncState(false);
+	//InitVSync();
+	//SetVSyncState(false);
 
 	RENDERER->initialize(	&hDC, 
 							&hRC, 
 							&hWnd,
 							&hInstance,
-							fullscreen	);
+							fullscreen,
+							width,
+							height);
+	
+	
 	
 	// Start main loop
 	while(!ENGINE->done)							// Loop That Runs While done=FALSE
@@ -303,7 +308,9 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 			if (ENGINE->keys[VK_F1])						// Is F1 Being Pressed?
 			{
 				ENGINE->keys[VK_F1]=FALSE;					// If So Make Key FALSE
-				KillGLWindow();						// Kill Our Current Window
+				RENDERER->pending_kill_gl = true;
+				while(RENDERER->pending_kill_gl);
+				//KillGLWindow();						// Kill Our Current Window
 				fullscreen=!fullscreen;				// Toggle Fullscreen / Windowed Mode
 				// Recreate Our OpenGL Window
 				if (!CreateGLWindow(title_string,width,height,32,fullscreen))

@@ -40,11 +40,14 @@ public:
 					HGLRC*		hglrc, 
 					HWND*		hWnd,
 					HINSTANCE*	hInstance,
-					bool		fullscreen);
+					bool		fullscreen,
+					int			width,
+					int			height);
 	void handle_resize();
 	void handle_fullscreen_toggle();
 
 	void kill_gl_window();
+	BOOL create_gl_window();
 
 	// Rendering functions
 	void render();
