@@ -2,25 +2,27 @@
 #define SCENE_H
 
 #include "entity.h"
+#include "camera.h"
 #include <vector>
 
 using namespace std;
 
 class Scene
 {
-private:
+public:
 	vector<Entity*> entities;
+	vector<Camera*> cameras;
 
 public:
 	Scene();
 	~Scene();
 
-	bool add();
+	bool add(Entity* e);
 	bool remove();
 
 	void play();
 	void pause();
-	void update(float delta_time);
+	void update(double delta_time);
 	
 };
 

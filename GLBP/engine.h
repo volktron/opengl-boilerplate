@@ -15,9 +15,10 @@ private:
 	static Timer* g_time;		// Global application time
 	static bool instanceflag;
 
-	std::vector<Scene> scenes;
 
 public:
+	std::vector<Scene*> scenes;
+
 	// Gameplay logic variables
 	float time_rate;	// The rate of passage of time
 	int day_length;

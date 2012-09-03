@@ -46,11 +46,6 @@ void SetVSyncState(bool enable);
 
 // Function declarations
 GLvoid KillGLWindow(GLvoid);
-void handleResize(int w, int h);
-
-// Temporary functions to get stuff on screen
-void render();
-
 
 #endif
 

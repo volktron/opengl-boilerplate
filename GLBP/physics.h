@@ -6,9 +6,9 @@ namespace Physics
 	class Vector3
 	{
 	public:
-		float x;
-		float y;
-		float z;
+		double x;
+		double y;
+		double z;
 
 		Vector3()
 		{
@@ -17,14 +17,14 @@ namespace Physics
 			this->z = 0;
 		}
 
-		Vector3(float x, float y, float z)
+		Vector3(double x, double y, double z)
 		{
 			this->x = x;
 			this->y = y;
 			this->z = z;
 		}
 
-		void set(float x, float y, float z)
+		void set(double x, double y, double z)
 		{
 			this->x = x;
 			this->y = y;
@@ -36,6 +36,8 @@ namespace Physics
 			this->x += v->x;
 			this->y += v->y;
 			this->z += v->z;
+
+			delete v;
 			return this;
 		}
 
@@ -54,7 +56,7 @@ namespace Physics
 				this->z + other->z);
 		}
 
-		Vector3* operator*(float mul)
+		Vector3* operator*(double mul)
 		{
 			return new Vector3(
 				this->x * mul,
@@ -86,14 +88,14 @@ namespace Physics
 			position_acceleration	= new Vector3();
 			
 			rotation				= new Vector3();
-			rotation_velocity		= new Vector3();
+			rotation_velocity		= new Vector3(120.0f, 360.0f, 60.0f);
 			rotation_acceleration	= new Vector3();
 
 			mass		= 0.0f;
 			friction	= 0.0f;
 		}
 
-		void update(float delta_time)
+		void update(double delta_time)
 		{
 			*this->position_velocity	+= *this->position_acceleration	* delta_time;
 			*this->position				+= *this->position_velocity		* delta_time;

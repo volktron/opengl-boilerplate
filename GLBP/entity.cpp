@@ -23,7 +23,7 @@ Entity::Entity(	float pos_x, float pos_y, float pos_z,
 	this->body->friction = friction;
 }
 
-void Entity::update(float delta_time)
+void Entity::update(double delta_time)
 {
 	this->body->update(delta_time);
 }

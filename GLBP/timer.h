@@ -11,16 +11,16 @@ public:
 	void update();
 	long long get_time();
 	double get_time_local();
-	double get_fps();
-	
+	float get_fps();
+	float get_delta();
 
 private:
 	long long time_old;
 	long long time_new;
 	long long time_rate;
 	long long time_start;
-	double fps;
-	double time_local;
+	float fps;
+	float time_local;
 };
 
 #endif

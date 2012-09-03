@@ -17,10 +17,18 @@ private:
 	HGLRC* hRC;
 
 public:
-	public:
+	bool pending_resize;
+	int pending_width;
+	int pending_height;
+
+	int g_width;
+	int g_height;
+
+public:
 	~Renderer();
 	static Renderer* getInstance();
 	void initialize(HDC* hDC, HGLRC* hglrc);
+	void handle_resize();
 
 	void render();
 };

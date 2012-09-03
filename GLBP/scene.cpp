@@ -2,7 +2,7 @@
 
 Scene::Scene()
 {
-	
+	this->cameras.push_back(new Camera());
 }
 
 Scene::~Scene()
@@ -10,8 +10,9 @@ Scene::~Scene()
 
 }
 
-bool Scene::add()
+bool Scene::add(Entity* e)
 {
+	this->entities.push_back(e);
 	return 1;
 }
 
@@ -30,11 +31,10 @@ void Scene::pause()
 
 }
 
-void Scene::update(float delta_time)
+void Scene::update(double delta_time)
 {
-	for(int i = 0; i < this->entities.size(); i++)
+	for(unsigned int i = 0; i < this->entities.size(); i++)
 	{
 		this->entities[i]->update(delta_time);
 	}
 }
-

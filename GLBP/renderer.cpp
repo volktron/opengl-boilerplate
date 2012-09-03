@@ -16,7 +16,7 @@ public:
 	HDC* hDC;
 	HGLRC* hRC;
 
-	void update_function()
+	void render()
 	{
 		RENDERER->render();
 		SwapBuffers(*hDC);				// Swap Buffers (Double Buffering)
@@ -27,7 +27,15 @@ public:
 		wglMakeCurrent(*hDC,*hRC);
 		while(!done)
 		{
-			update_function();
+			// Check for events
+			if(RENDERER->pending_resize)
+			{
+				RENDERER->pending_resize = false;
+				RENDERER->handle_resize();
+			}
+
+			// Render!
+			render();
 		}
 
 		return true;
@@ -87,20 +95,62 @@ Renderer* Renderer::getInstance()
 	return renderer;
 }
 
+void Renderer::handle_resize()
+{
+	g_width = pending_width;
+	g_height = pending_height;
+
+	if (g_height == 0)										// Prevent A Divide By Zero By
+	{
+		g_height = 1;										// Making Height Equal One
+	}
+
+	glViewport(0, 0, g_width, g_height);
+
+	glMatrixMode(GL_PROJECTION);
+
+	glLoadIdentity();
+	gluPerspective(45.0,
+					(double)g_width / (double)g_height,
+					0.01,
+					10000000.0);
+	glMatrixMode(GL_MODELVIEW);
+
+	//InitVSync();
+	//SetVSyncState(false);
+}
+
 void Renderer::render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear The Screen And The Depth Buffer
     glLoadIdentity();
-	glTranslatef(-1.5f,0.0f,-6.0f);   
-	glRotatef(ENGINE->timer()->get_time_local()*50.0, 1.0, 0.0, 0.0);
-	glRotatef(ENGINE->timer()->get_time_local()*20.0, 0.0, 1.0, 0.0);
-	glBegin(GL_TRIANGLES);                      // Drawing Using Triangles
+	
+	int cam_x = ENGINE->scenes[0]->cameras[0]->body->position->x;
+	int cam_y = ENGINE->scenes[0]->cameras[0]->body->position->y;
+	int cam_z = ENGINE->scenes[0]->cameras[0]->body->position->z;
+	glTranslatef(	-cam_x,
+					-cam_y, 
+					-cam_z	);
+	
+	int num_entities = ENGINE->scenes[0]->entities.size();
+	for(int i = 0; i < num_entities; i++)
+	{
+		glPushMatrix();
+		glRotatef(ENGINE->scenes[0]->entities[i]->body->rotation->x, 1.0f, 0.0f, 0.0f);
+		glRotatef(ENGINE->scenes[0]->entities[i]->body->rotation->y, 0.0f, 1.0f, 0.0f);
+		glRotatef(ENGINE->scenes[0]->entities[i]->body->rotation->z, 0.0f, 0.0f, 1.0f);
+		glBegin(GL_TRIANGLES);                      // Drawing Using Triangles
 		glColor3f(1.0f,0.0f,0.0f);
 		glVertex3f( 0.0f, 1.0f, 0.0f);              // Top
 		glColor3f(0.0f,1.0f,0.0f);
 		glVertex3f(-1.0f,-1.0f, 0.0f);              // Bottom Left
 		glColor3f(0.0f,0.0f,1.0f);
 		glVertex3f( 1.0f,-1.0f, 0.0f);              // Bottom Right
-	glEnd();   
+		glEnd();
+		glPopMatrix();
+		glTranslatef(1.5f,0.0f,0.0f);   
+	}
+
+	   
 }
 

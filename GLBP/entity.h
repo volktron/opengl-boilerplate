@@ -18,7 +18,7 @@ public:
 			float rot_x, float rot_y, float rot_z,
 			float mass, float friction				);
 
-	void update(float delta_time);
+	void update(double delta_time);
 };
 
 #endif

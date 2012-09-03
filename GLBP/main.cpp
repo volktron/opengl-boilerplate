@@ -160,7 +160,10 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
 	ShowWindow(hWnd,SW_SHOW);						// Show The Window
 	SetForegroundWindow(hWnd);						// Slightly Higher Priority
 	SetFocus(hWnd);									// Sets Keyboard Focus To The Window
-	handleResize(width, height);					// Set Up Our Perspective GL Screen
+	RENDERER->pending_width = width;
+	RENDERER->pending_height = height;
+	RENDERER->pending_resize = true;
+	RENDERER->handle_resize();					// Set Up Our Perspective GL Screen
 
 	return TRUE;									// Success
 }
@@ -206,31 +209,6 @@ GLvoid KillGLWindow(GLvoid)								// Properly Kill The Window
 		MessageBox(NULL,"Could Not Unregister Class.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
 		hInstance=NULL;									// Set hInstance To NULL
 	}
-}
-
-void handleResize(int w, int h)
-{
-	width = w;
-	height = h;
-
-	if (height == 0)										// Prevent A Divide By Zero By
-	{
-		height = 1;										// Making Height Equal One
-	}
-
-	glViewport(0, 0, w, h);
-
-	glMatrixMode(GL_PROJECTION);
-
-	glLoadIdentity();
-	gluPerspective(45.0,
-					(double)w / (double)h,
-					0.01,
-					10000000.0);
-	glMatrixMode(GL_MODELVIEW);
-
-	InitVSync();
-	SetVSyncState(false);
 }
 
 //init VSync func
@@ -291,7 +269,6 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 	SetVSyncState(false);
 
 	RENDERER->initialize(&hDC, &hRC);
-
 	
 	// Start main loop
 	while(!ENGINE->done)							// Loop That Runs While done=FALSE
@@ -319,7 +296,6 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 				}
 			}
 
-			/*
 			if (ENGINE->keys[VK_F1])						// Is F1 Being Pressed?
 			{
 				ENGINE->keys[VK_F1]=FALSE;					// If So Make Key FALSE
@@ -330,7 +306,7 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 				{
 					return 0;						// Quit If Window Was Not Created
 				}
-			}*/
+			}
 		}
 		ENGINE->update();
 	}
@@ -394,7 +370,10 @@ LRESULT CALLBACK WndProc(	HWND	hWnd,			// Handle For This Window
 		}
 		case WM_SIZE:								// Resize The OpenGL Window
 		{
-			handleResize(LOWORD(lParam),HIWORD(lParam));  // LoWord=Width, HiWord=Height
+			RENDERER->pending_width		= LOWORD(lParam);
+			RENDERER->pending_height	= HIWORD(lParam);
+			RENDERER->pending_resize	= true;
+			
 			return 0;								// Jump Back
 		}
 	}
