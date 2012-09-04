@@ -95,6 +95,12 @@ void Renderer::initialize(	HDC*		hDC,
 	this->g_width = width;
 	this->g_height = height;
 	
+	RECT desktop;
+	const HWND hDesktop = GetDesktopWindow();
+	GetWindowRect(hDesktop, &desktop);
+	this->win_width		= desktop.right;
+	this->win_height	= desktop.bottom;
+
 	this->create_gl_window();
 	this->init_gl_window();
 	wglMakeCurrent(0,0);
@@ -277,6 +283,18 @@ BOOL Renderer::create_gl_window()
 				return FALSE;									// Return FALSE
 			}
 		}
+	}
+	else
+	{
+		DEVMODE dmScreenSettings;								// Device Mode
+		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));	// Makes Sure Memory's Cleared
+		dmScreenSettings.dmSize=sizeof(dmScreenSettings);		// Size Of The Devmode Structure
+		dmScreenSettings.dmPelsWidth	= this->win_width;				// Selected Screen Width
+		dmScreenSettings.dmPelsHeight	= this->win_height;				// Selected Screen Height
+		dmScreenSettings.dmBitsPerPel	= 32;					// Selected Bits Per Pixel
+		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+
+		ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN);
 	}
 
 	if (this->fullscreen)												// Are We Still In Fullscreen Mode?

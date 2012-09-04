@@ -26,6 +26,9 @@ public:
 	int g_width;
 	int g_height;
 
+	int win_width;
+	int win_height;
+
 	bool pending_fullscreen;
 	bool fullscreen;
 
