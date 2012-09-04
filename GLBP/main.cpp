@@ -98,15 +98,17 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 			if (ENGINE->keys[VK_F1])						// Is F1 Being Pressed?
 			{
 				ENGINE->keys[VK_F1]=FALSE;					// If So Make Key FALSE
-				RENDERER->pending_kill_gl = true;
-				while(RENDERER->pending_kill_gl);
-				//KillGLWindow();						// Kill Our Current Window
-				fullscreen=!fullscreen;				// Toggle Fullscreen / Windowed Mode
-				// Recreate Our OpenGL Window
-				if (!RENDERER->create_gl_window())
-				{
-					return 0;						// Quit If Window Was Not Created
-				}
+
+				RENDERER->pending_fullscreen = true;
+				while(!RENDERER->thread_waiting);
+
+				wglMakeCurrent(hDC,hRC);
+				RENDERER->kill_gl_window();
+				RENDERER->create_gl_window();
+				RENDERER->init_gl_window();
+				wglMakeCurrent(0,0);
+				RENDERER->pending_fullscreen = false;
+				
 			}
 		}
 		ENGINE->update();

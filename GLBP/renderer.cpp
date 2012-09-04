@@ -12,16 +12,12 @@
 
 class Render_Thread : public Thread
 {
+
 public:
 	bool done;
 	HDC* hDC;
 	HGLRC* hRC;
 
-	void render()
-	{
-		RENDERER->render();
-		SwapBuffers(*hDC);				// Swap Buffers (Double Buffering)
-	}
 
 	virtual DWORD Run( LPVOID /* arg */ )
 	{
@@ -39,9 +35,21 @@ public:
 				RENDERER->pending_kill_gl = false;
 				RENDERER->kill_gl_window();
 			}
+			if(RENDERER->pending_fullscreen)
+			{
+				RENDERER->fullscreen = !RENDERER->fullscreen;
+				wglMakeCurrent(0,0);
+				RENDERER->thread_waiting = true;
+				
+				while (RENDERER->pending_fullscreen);
+				
+				RENDERER->thread_waiting = false;
+				wglMakeCurrent(*hDC,*hRC);
+			}
 
 			// Render!
-			render();
+			RENDERER->render();
+			SwapBuffers(*hDC);				// Swap Buffers (Double Buffering)
 		}
 
 		return true;
@@ -81,25 +89,14 @@ void Renderer::initialize(	HDC*		hDC,
 
 	this->pending_fullscreen	= false;
 	this->pending_kill_gl		= false;
+	this->thread_waiting		= false;
 	this->fullscreen			= fullscreen;
 
 	this->g_width = width;
 	this->g_height = height;
 	
 	this->create_gl_window();
-	glewInit();
-	
-	glShadeModel(GL_SMOOTH);							// Enable Smooth Shading
-	glClearColor(0.4f, 0.3f, 0.2f, 0.5f);				// Black Background
-	glClearDepth(1.0f);									// Depth Buffer Setup
-	glEnable(GL_DEPTH_TEST);							// Enables Depth Testing
-	glEnable(GL_BLEND);
-	glEnable(GL_ALPHA);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
-	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-
+	this->init_gl_window();
 	wglMakeCurrent(0,0);
 	((Render_Thread*)render_thread)->hDC = hDC;
 	((Render_Thread*)render_thread)->hRC = hRC;
@@ -382,4 +379,19 @@ BOOL Renderer::create_gl_window()
 	RENDERER->handle_resize();					// Set Up Our Perspective GL Screen
 
 	return TRUE;									// Success
+}
+
+void Renderer::init_gl_window()
+{
+	glewInit();
+	glShadeModel(GL_SMOOTH);							// Enable Smooth Shading
+	glClearColor(0.4f, 0.3f, 0.2f, 0.5f);				// Black Background
+	glClearDepth(1.0f);									// Depth Buffer Setup
+	glEnable(GL_DEPTH_TEST);							// Enables Depth Testing
+	glEnable(GL_BLEND);
+	glEnable(GL_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 }

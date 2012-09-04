@@ -30,6 +30,7 @@ public:
 	bool fullscreen;
 
 	bool pending_kill_gl;
+	bool thread_waiting;
 
 public:
 	~Renderer();
@@ -48,6 +49,7 @@ public:
 
 	void kill_gl_window();
 	BOOL create_gl_window();
+	void init_gl_window();
 
 	// Rendering functions
 	void render();
