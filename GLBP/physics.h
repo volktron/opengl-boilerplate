@@ -1,6 +1,8 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
+#include <vector>
+
 namespace Physics
 {
 	class Vector3
@@ -10,59 +12,16 @@ namespace Physics
 		double y;
 		double z;
 
-		Vector3()
-		{
-			this->x = 0;
-			this->y = 0;
-			this->z = 0;
-		}
+		Vector3();
 
-		Vector3(double x, double y, double z)
-		{
-			this->x = x;
-			this->y = y;
-			this->z = z;
-		}
+		Vector3(double x, double y, double z);
+		void set(double x, double y, double z);
 
-		void set(double x, double y, double z)
-		{
-			this->x = x;
-			this->y = y;
-			this->z = z;
-		}
+		Vector3* operator+=(Vector3* v);
+		void cross(Vector3* v);
 
-		Vector3* operator+=(Vector3* v)
-		{
-			this->x += v->x;
-			this->y += v->y;
-			this->z += v->z;
-
-			delete v;
-			return this;
-		}
-
-		void cross(Vector3* v)
-		{
-			this->x = (this->y + v->z) - (this->z + v->y);
-			this->y = (this->z + v->x) - (this->x + v->z);
-			this->z = (this->x + v->y) - (this->y + v->x);
-		}
-
-		Vector3* operator+(Vector3* other)
-		{
-			return new Vector3(
-				this->x + other->x,
-				this->y + other->y,
-				this->z + other->z);
-		}
-
-		Vector3* operator*(double mul)
-		{
-			return new Vector3(
-				this->x * mul,
-				this->y * mul,
-				this->z * mul);
-		}
+		Vector3* operator+(Vector3* other);
+		Vector3* operator*(double mul);
 
 	};
 
@@ -95,15 +54,7 @@ namespace Physics
 			friction	= 0.0f;
 		}
 
-		void update(double delta_time)
-		{
-			*this->position_velocity	+= *this->position_acceleration	* delta_time;
-			*this->position				+= *this->position_velocity		* delta_time;
-
-			*this->rotation_velocity	+= *this->rotation_acceleration	* delta_time;
-			*this->rotation				+= *this->rotation_velocity		* delta_time;
-		}
-
+		void update(double delta_time);
 
 	};
 
