@@ -35,6 +35,8 @@ public:
 	bool pending_kill_gl;
 	bool thread_waiting;
 
+	bool initialized;
+
 public:
 	~Renderer();
 	static Renderer* get_instance();

@@ -70,6 +70,7 @@ bool Renderer::instanceflag = false;
 
 Renderer::Renderer()
 {
+	this->initialized = false;
 	render_thread = new Render_Thread();
 	((Render_Thread*)render_thread)->done = false;
 }
@@ -107,6 +108,8 @@ void Renderer::initialize(	HDC*		hDC,
 	((Render_Thread*)render_thread)->hDC = hDC;
 	((Render_Thread*)render_thread)->hRC = hRC;
 	((Render_Thread*)render_thread)->Start();
+
+	this->initialized = true;	
 }
 
 Renderer::~Renderer()
@@ -284,7 +287,7 @@ BOOL Renderer::create_gl_window()
 			}
 		}
 	}
-	else
+	else if (this->initialized)
 	{
 		DEVMODE dmScreenSettings;								// Device Mode
 		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));	// Makes Sure Memory's Cleared
