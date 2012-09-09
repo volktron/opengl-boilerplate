@@ -60,7 +60,7 @@ public:
 		// Shutdown the gl context
 		RENDERER->pending_kill_gl = true;
 		while(RENDERER->pending_kill_gl);
-
+		
 		return Thread::Stop(bForceKill);
 	}
 };
@@ -110,11 +110,6 @@ void Renderer::initialize(	HDC*		hDC,
 	((Render_Thread*)render_thread)->Start();
 
 	this->initialized = true;	
-}
-
-Renderer::~Renderer()
-{
-	((Render_Thread*)render_thread)->Stop();
 }
 
 Renderer* Renderer::get_instance()
@@ -415,4 +410,10 @@ void Renderer::init_gl_window()
 	glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+}
+
+void Renderer::shutdown()
+{
+	((Render_Thread*)render_thread)->Stop();
+	delete render_thread;
 }

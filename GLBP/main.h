@@ -15,6 +15,9 @@
 #include <gl\glu.h>		
 #include "wglext.h"
 
+// Input
+#include "input.h"
+
 #include <string>
 #include <sstream>
 

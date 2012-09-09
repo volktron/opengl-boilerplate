@@ -7,6 +7,8 @@ Scene::Scene()
 
 Scene::~Scene()
 {
+	for (Entity* e = this->entities[0]; e != this->entities[this->entities.size()-1]; e++)
+		delete e;
 
 }
 

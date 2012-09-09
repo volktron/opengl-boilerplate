@@ -38,7 +38,6 @@ public:
 	bool initialized;
 
 public:
-	~Renderer();
 	static Renderer* get_instance();
 	
 	// Event functions
@@ -49,6 +48,8 @@ public:
 					bool		fullscreen,
 					int			width,
 					int			height);
+	void shutdown();
+
 	void handle_resize();
 	void handle_fullscreen_toggle();
 

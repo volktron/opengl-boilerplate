@@ -47,6 +47,12 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 {
 	MSG		msg;									// Windows Message Structure
 	
+	// Let's get a console going for debug purposes
+	AllocConsole();
+	freopen("conin$","r",stdin);
+	freopen("conout$","w",stdout);
+	freopen("conout$","w",stderr);
+	
 	// Ask The User Which Screen Mode They Prefer
 	//if (MessageBox(NULL,"Would You Like To Run In Fullscreen Mode?", "Start FullScreen?",MB_YESNO|MB_ICONQUESTION)==IDNO)
 	//{
@@ -54,7 +60,8 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 	//}
 	
 	ENGINE->initialize();
-	
+	INPUT->initialize();
+
 	// Game setup
 	//InitVSync();
 	//SetVSyncState(false);
@@ -111,10 +118,12 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 				
 			}
 		}
+		INPUT->update();
 		ENGINE->update();
 	}
+
 	// Shutdown
-	RENDERER->~Renderer();
+	RENDERER->shutdown();
 	ENGINE->~Engine();
 	return (msg.wParam);							// Exit The Program
 }

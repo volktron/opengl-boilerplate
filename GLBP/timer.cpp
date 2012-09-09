@@ -26,8 +26,8 @@ void Timer::update()
 {
 	time_old = time_new;
 	QueryPerformanceCounter((LARGE_INTEGER*)&time_new);
-	time_local = 1.0f * (double)(time_new - time_start)/(time_rate * 1.0f);
-	fps = 1.0f / ((double)(time_new - time_old)  /(time_rate));
+	time_local = 1.0 * (double)(time_new - time_start)/(time_rate * 1.0);
+	fps = 1.0 / ((double)(time_new - time_old)  /(time_rate));
 }
 
 long long Timer::get_time()
