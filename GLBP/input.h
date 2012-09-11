@@ -51,7 +51,7 @@ namespace Input
 	public:
 		std::vector<InputEvent> events;
 		std::vector<InputEvent> triggers;
-		std::vector<int*> trigger_functions;
+		std::vector<void ( *)(void)> trigger_functions;
 		XboxController* xboxcontrollers[4];
 
 	private:
@@ -63,7 +63,7 @@ namespace Input
 		void update();
 
 		bool register_event(InputEvent* e);
-		bool register_trigger(InputEvent* e, int* trigger);
+		bool register_trigger(InputEvent* e, void (*trigger)(void));
 	};
 
 }

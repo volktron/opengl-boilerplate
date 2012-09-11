@@ -71,7 +71,7 @@ namespace Input
 						this->id,
 						ENGINE->timer()->get_time_local(),
 						false));
-					std::cout << XboxController::buttons[i] << " button released\n";
+					std::cout << XboxController::buttons[i] << " button released" << INPUT->events.size() << "\n";
 				}			
 			}
 
@@ -112,11 +112,25 @@ namespace Input
 
 	bool InputManager::register_event(InputEvent* e)
 	{
-		this->events.push_back(*e);
+		// Triggers
+		for(int i = 0; i < INPUT->triggers.size(); i++)
+				if(	e->source	== INPUT->triggers[i].source &&
+					e->name		== INPUT->triggers[i].name)
+					(INPUT->trigger_functions[i])();
+
+		// State change
+		if(e->down)
+			this->events.push_back(*e);
+		else
+			for(int i = 0; i < INPUT->events.size(); i++)
+				if(	e->source	== INPUT->events[i].source &&
+					e->name		== INPUT->events[i].name)
+					INPUT->events.erase(INPUT->events.begin() + i);
+
 		return true;
 	}
 
-	bool InputManager::register_trigger(InputEvent* e, int* trigger)
+	bool InputManager::register_trigger(InputEvent* e, void (*trigger)(void))
 	{
 		this->triggers.push_back(*e);
 		this->trigger_functions.push_back(trigger);
