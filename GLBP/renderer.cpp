@@ -24,6 +24,10 @@ public:
 		wglMakeCurrent(*hDC,*hRC);
 		while(!done)
 		{
+			// Render!
+			RENDERER->render();
+			SwapBuffers(*hDC);				// Swap Buffers (Double Buffering)
+		
 			// Check for events
 			if(RENDERER->pending_resize)
 			{
@@ -34,6 +38,16 @@ public:
 			{
 				RENDERER->pending_kill_gl = false;
 				RENDERER->kill_gl_window();
+			}
+			if(RENDERER->pending_shutdown)
+			{
+				wglMakeCurrent(0,0);
+				RENDERER->thread_waiting = true;
+				
+				while (RENDERER->pending_shutdown);
+				
+				RENDERER->thread_waiting = false;
+				this->done = true;
 			}
 			if(RENDERER->pending_fullscreen)
 			{
@@ -47,21 +61,9 @@ public:
 				wglMakeCurrent(*hDC,*hRC);
 			}
 
-			// Render!
-			RENDERER->render();
-			SwapBuffers(*hDC);				// Swap Buffers (Double Buffering)
 		}
-
-		return true;
-	}
-
-	DWORD Stop ( bool bForceKill = false )
-	{
-		// Shutdown the gl context
-		RENDERER->pending_kill_gl = true;
-		while(RENDERER->pending_kill_gl);
-		
-		return Thread::Stop(bForceKill);
+		this->done = false;
+		ExitThread(0);
 	}
 };
 
@@ -110,6 +112,7 @@ void Renderer::initialize(	HDC*		hDC,
 	((Render_Thread*)render_thread)->Start();
 
 	this->initialized = true;	
+	this->pending_shutdown = false;
 }
 
 Renderer* Renderer::get_instance()
@@ -414,6 +417,17 @@ void Renderer::init_gl_window()
 
 void Renderer::shutdown()
 {
-	((Render_Thread*)render_thread)->Stop();
+	// Shutdown the gl context
+	RENDERER->pending_shutdown = true;
+	while(!RENDERER->thread_waiting);
+
+	wglMakeCurrent(*this->hDC, *this->hRC);
+	RENDERER->kill_gl_window();
+	RENDERER->pending_shutdown = false;
+		
+	while(((Render_Thread*)render_thread)->done);
+	Sleep(100);
+
+	Sleep(100);
 	delete render_thread;
 }

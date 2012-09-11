@@ -1,11 +1,42 @@
 #include <Windows.h>
 #include <vector>
+#include <iostream>
 #include "input.h"
+#include "engine.h"
 
 namespace Input
 {
 	bool InputManager::instance_flag = false;
 	InputManager* InputManager::instance = 0;
+
+	unsigned long XboxController::buttons[14] = {
+		XINPUT_GAMEPAD_DPAD_UP          ,
+		XINPUT_GAMEPAD_DPAD_DOWN        ,
+		XINPUT_GAMEPAD_DPAD_LEFT        ,
+		XINPUT_GAMEPAD_DPAD_RIGHT       ,
+		XINPUT_GAMEPAD_START            ,
+		XINPUT_GAMEPAD_BACK             ,
+		XINPUT_GAMEPAD_LEFT_THUMB       ,
+		XINPUT_GAMEPAD_RIGHT_THUMB      ,
+		XINPUT_GAMEPAD_LEFT_SHOULDER    ,
+		XINPUT_GAMEPAD_RIGHT_SHOULDER   ,
+		XINPUT_GAMEPAD_A                ,
+		XINPUT_GAMEPAD_B                ,
+		XINPUT_GAMEPAD_X                ,
+		XINPUT_GAMEPAD_Y                
+
+	};
+
+	InputEvent::InputEvent(	unsigned long name,
+							int source,
+							float time,
+							bool down)
+	{
+		this->name		= name;
+		this->source	= source;
+		this->time		= time;
+		this->down		= down;
+	}
 
 	XboxController::XboxController(DWORD id)
 	{
@@ -14,8 +45,37 @@ namespace Input
 
 	void XboxController::update()
 	{
-		this->previous_state = this->state;
-		this->state_result = XInputGetState(this->id, &this->state);
+		this->state_result = XInputGetState(this->id, &this->polling_state);
+		if (this->state_result == ERROR_SUCCESS)
+		{
+			this->previous_state = this->current_state;
+			this->current_state = this->polling_state;
+		
+			for(int i = 0; i < 14; i++)
+			{
+				if ((this->current_state.Gamepad.wButtons & XboxController::buttons[i]) &&
+				   !(this->previous_state.Gamepad.wButtons & XboxController::buttons[i]))
+				{
+					INPUT->register_event(
+						new InputEvent(XboxController::buttons[i],
+						this->id,
+						ENGINE->timer()->get_time_local(),
+						true));
+					std::cout << XboxController::buttons[i] << " button pressed\n";
+				}
+				else if (!(this->current_state.Gamepad.wButtons & XboxController::buttons[i]) &&
+						  (this->previous_state.Gamepad.wButtons & XboxController::buttons[i]))
+				{
+					INPUT->register_event(
+						new InputEvent(XboxController::buttons[i],
+						this->id,
+						ENGINE->timer()->get_time_local(),
+						false));
+					std::cout << XboxController::buttons[i] << " button released\n";
+				}			
+			}
+
+		}
 		
 	}
 
@@ -48,5 +108,18 @@ namespace Input
 	{
 		for(int i = 0; i < 4; i++)
 			this->xboxcontrollers[i]->update();
+	}
+
+	bool InputManager::register_event(InputEvent* e)
+	{
+		this->events.push_back(*e);
+		return true;
+	}
+
+	bool InputManager::register_trigger(InputEvent* e, int* trigger)
+	{
+		this->triggers.push_back(*e);
+		this->trigger_functions.push_back(trigger);
+		return true;
 	}
 }

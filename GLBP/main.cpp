@@ -125,6 +125,9 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 	// Shutdown
 	RENDERER->shutdown();
 	ENGINE->~Engine();
+
+	FreeConsole();
+
 	return (msg.wParam);							// Exit The Program
 }
 

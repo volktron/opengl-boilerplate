@@ -36,6 +36,7 @@ public:
 	bool thread_waiting;
 
 	bool initialized;
+	bool pending_shutdown;
 
 public:
 	static Renderer* get_instance();
