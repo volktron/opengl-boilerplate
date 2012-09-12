@@ -49,9 +49,10 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 	
 	// Let's get a console going for debug purposes
 	AllocConsole();
-	freopen("conin$","r",stdin);
-	freopen("conout$","w",stdout);
-	freopen("conout$","w",stderr);
+	FILE* stream;
+	freopen_s(&stream,"conin$","r",stdin);
+	freopen_s(&stream,"conout$","w",stdout);
+	freopen_s(&stream,"conout$","w",stderr);
 	
 	// Ask The User Which Screen Mode They Prefer
 	//if (MessageBox(NULL,"Would You Like To Run In Fullscreen Mode?", "Start FullScreen?",MB_YESNO|MB_ICONQUESTION)==IDNO)
