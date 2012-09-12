@@ -31,13 +31,13 @@ namespace Input
 	public:
 		unsigned long name;
 		int source;
-		float time;
+		double time;
 		bool down;
 
 	public:
 		InputEvent(	unsigned long name,
 					int source,
-					float time,
+					double time,
 					bool down);
 	};
 

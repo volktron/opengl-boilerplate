@@ -40,12 +40,12 @@ double Timer::get_time_local()
 	return time_local;
 }
 
-float Timer::get_fps()
+double Timer::get_fps()
 {
 	return fps;
 }
 
-float Timer::get_delta()
+double Timer::get_delta()
 {
 	return 1.0f/fps;
 }

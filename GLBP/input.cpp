@@ -29,7 +29,7 @@ namespace Input
 
 	InputEvent::InputEvent(	unsigned long name,
 							int source,
-							float time,
+							double time,
 							bool down)
 	{
 		this->name		= name;
@@ -113,7 +113,7 @@ namespace Input
 	bool InputManager::register_event(InputEvent* e)
 	{
 		// Triggers
-		for(int i = 0; i < INPUT->triggers.size(); i++)
+		for(unsigned int i = 0; i < INPUT->triggers.size(); i++)
 				if(	e->source	== INPUT->triggers[i].source &&
 					e->name		== INPUT->triggers[i].name)
 					(INPUT->trigger_functions[i])();
@@ -122,7 +122,7 @@ namespace Input
 		if(e->down)
 			this->events.push_back(*e);
 		else
-			for(int i = 0; i < INPUT->events.size(); i++)
+			for(unsigned int i = 0; i < INPUT->events.size(); i++)
 				if(	e->source	== INPUT->events[i].source &&
 					e->name		== INPUT->events[i].name)
 					INPUT->events.erase(INPUT->events.begin() + i);
